@@ -29,8 +29,9 @@ fields terminated by ','
 optionally enclosed by '"'
 lines terminated by '\n'
 ignore 1 rows
-(review_id, product_id, rating, date, summary, body, recommend, reported, reviewer_name, reviewer_email, @vresponse, helpfulness);
-set response = NULLIF(@vresponse, null)
+(review_id, product_id, rating, date, summary, body, recommend, reported, reviewer_name, reviewer_email, @vresponse, helpfulness)
+set response = NULLIF(@vresponse, 'null');
+
 load data local infile '/Users/danieltawata/Documents/sdc/reviewsSQL/reviews_photos.csv'
 into table photos
 fields terminated by ','

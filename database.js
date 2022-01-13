@@ -15,10 +15,11 @@ connection.connect((err) => {
   }
 })
 
-const getReviews = () => {
+const getReviews = (id) => {
   return new Promise((resolve, reject) => {
-    const queryString = 'select * from reviews where product_id = 40344';
-    connection.query(queryString, (err, results, field) => {
+    const queryString = 'select * from reviews where product_id = ? limit 5';
+    const queryArgs = [id];
+    connection.query(queryString, queryArgs, (err, results, field) => {
       if (err) {
         reject(err);
       } else {
@@ -28,10 +29,17 @@ const getReviews = () => {
   })
 };
 
-const getReviewPhotos = (id) => {
+const getReviewPhotos = (ids) => {
   return new Promise((resolve, reject) => {
-    const queryString = 'select * from photos where review_id = ?';
-    const queryArgs = id;
+    // const queryString = 'select * from photos where review_id in (232057,232058,232059,232060,232061)';
+    let queryString = 'select * from photos where review_id in (';
+    const queryArgs = ids;
+    let questions = '';
+    for (let i = 0; i < queryArgs.length; i++) {
+      questions += ',?';
+    }
+    questions = questions.slice(1) + ')';
+    queryString = queryString + questions;
     connection.query(queryString, queryArgs, (err, results, field) => {
       if (err) {
         reject(err);
@@ -42,6 +50,18 @@ const getReviewPhotos = (id) => {
   });
 };
 
+// const getReviewPhotos = (id) => {
+//   return new Promise((resolve, reject) => {
+//     const queryString = 'select * from reviews, photos where reviews.review_id = photos.review_id and reviews.product_id = 40344;';
+//     connection.query(queryString,(err, results, field) => {
+//       if (err) {
+//         reject(err);
+//       } else {
+//         resolve(results);
+//       }
+//     });
+//   });
+// };
 
 
 module.exports = {
