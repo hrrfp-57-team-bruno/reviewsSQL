@@ -10,9 +10,13 @@ app.use(cors({
 }));
 
 app.get('/reviews', (req, res) => {
-  const { product_id, count } = req.query;
+  const { product_id } = req.query;
+  let count = 5;
+  if (req.query.count) {
+    count = Number(req.query.count);
+  }
   const obj = {};
-  db.getReviews(product_id)
+  db.getReviews(product_id, count)
     .then((data) => {
       obj.product = data[0].product_id.toString();
       obj.page = 0;
@@ -38,6 +42,94 @@ app.get('/reviews', (req, res) => {
     .catch((err) => {
       console.log(err);
     });
+});
+
+app.get('/reviews/meta', (req, res) => {
+  const { product_id } = req.query;
+  const obj = {
+    product_id: product_id,
+    ratings: {
+      1: 0,
+      2: 0,
+      3: 0,
+      4: 0,
+      5: 0
+    },
+    recommended: {
+      false: 0,
+      true: 0
+    },
+    characteristics: {
+      // Fit: {
+      //   id: null,
+      //   value: 0
+      // },
+      // Length: {
+      //   id: null,
+      //   value: 0
+      // },
+      // Comfort: {
+      //   id: null,
+      //   value: 0
+      // },
+      // Quality: {
+      //   id: null,
+      //   value: 0
+      // }
+    }
+  }
+  db.getMetaData(product_id)
+    .then((data) => {
+      const temp = {
+        Fit: {
+          id: null,
+          total: 0,
+          reviews: 0
+        },
+        Length: {
+          id: null,
+          total: 0,
+          reviews: 0
+         },
+        Comfort: {
+          id: null,
+          total: 0,
+          reviews: 0
+         },
+        Quality: {
+          id: null,
+          total: 0,
+          reviews: 0
+         }
+      }
+      for (let i = 0; i < data.length; i++) {
+        temp[data[i].characteristic].id = data[i].characteristic_id;
+        temp[data[i].characteristic].total += data[i].value;
+        temp[data[i].characteristic].reviews++;
+      }
+      for (let key in temp) {
+        if (temp[key]['reviews'] !== 0) {
+          obj.characteristics[key] = {};
+          obj.characteristics[key].id = temp[key].id;
+          obj.characteristics[key].value = temp[key]['total'] / temp[key]['reviews'];
+        }
+      }
+      return db.getReviews(product_id, 5);
+    })
+    .then((data) => {
+      for (let i = 0; i < data.length; i++) {
+        obj.ratings[data[i].rating]++;
+        if (data[i].recommend) {
+          obj.recommended.true++;
+        } else {
+          obj.recommended.false++;
+        }
+      }
+      res.send(obj);
+    })
+    .catch((err) => {
+      console.log(err);
+    })
 });
 
 
