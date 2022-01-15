@@ -6,11 +6,11 @@ create table reviews (
   review_id integer primary key not null auto_increment,
   product_id integer,
   rating integer,
-  date date,
+  date char(13),
   summary text,
   body text,
-  recommend boolean,
-  reported text,
+  recommend varchar(7),
+  reported varchar(7),
   reviewer_name text,
   reviewer_email text,
   response text,
@@ -47,7 +47,7 @@ optionally enclosed by '"'
 lines terminated by '\n'
 ignore 1 rows
 (review_id, product_id, rating, date, summary, body, recommend, reported, reviewer_name, reviewer_email, @vresponse, helpfulness)
-set response = NULLIF(@vresponse, 'null');
+set response = nullif(@vresponse, 'null');
 
 load data local infile '/Users/danieltawata/Documents/sdc/reviewsSQL/reviews_photos.csv'
 into table photos
@@ -77,3 +77,6 @@ update meta inner join characteristics
 on meta.characteristic_id = characteristics.id
 set meta.product_id = characteristics.product_id, meta.characteristic = characteristics.name;
 
+drop table characteristics;
+
+create index index_product_id on meta(product_id);
