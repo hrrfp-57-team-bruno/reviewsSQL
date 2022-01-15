@@ -9,6 +9,38 @@ app.use(cors({
   origin: 'http://localhost:3000'
 }));
 
+// review_id integer primary key not null auto_increment,
+// product_id integer,
+// rating integer,
+// date char(13),
+// summary text,
+// body text,
+// recommend varchar(7),
+// reported varchar(7),
+// reviewer_name text,
+// reviewer_email text,
+// response text,
+// helpfulness integer,
+
+app.post('/reviews', (req, res) => {
+  console.log(req.body);
+  db.addReview(req.body)
+    .then((data) => {
+      console.log(data.insertId);
+      for (let i = 0; i < req.body.photos.length; i++) {
+        db.addPhotos(data.insertId, req.body.photos[i]);
+      }
+      return data.insertId;
+    })
+    .then((id) => {
+      return db.searchMeta(14)
+    })
+    .then((data) => {
+      console.log(data);
+      res.send();
+    })
+});
+
 app.get('/reviews', (req, res) => {
   const { product_id } = req.query;
   let count = 5;
@@ -18,6 +50,12 @@ app.get('/reviews', (req, res) => {
   const obj = {};
   db.getReviews(product_id, count)
     .then((data) => {
+      console.log('!!!', data);
+      for (let i = 0; i < data.length; i++) {
+        data[i].recommend ? data[i].recommend = true : data[i].recommend = false;
+        data[i].reported ? data[i].reported = true : data[i].reported = false;
+        data[i].date = new Date(Number(data[i].date)).toISOString();
+      }
       obj.product = data[0].product_id.toString();
       obj.page = 0;
       obj.count = 5;
