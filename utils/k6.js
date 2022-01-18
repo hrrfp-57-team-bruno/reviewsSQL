@@ -5,15 +5,20 @@ import { Counter } from 'k6/metrics';
 export const requests = new Counter('http_reqs');
 
 export const options = {
-  vus: 200,
+  vus: 1000,
   duration: '60s',
 }
 
-const url = 'http://localhost:3001/reviews/meta?product_id=40344';
 // const url = 'http://localhost:3001/reviews/?product_id=40344';
+const url = 'http://localhost:3001/reviews/meta?product_id=40344';
+// const url = 'https://app-hrsei-api.herokuapp.com/api/fec2/hr-rfp/reviews/?product_id=40344';
+// const url = 'https://app-hrsei-api.herokuapp.com/api/fec2/hr-rfp/reviews/meta?product_id=40344';
 
 export default function() {
-  const res = http.get(url);
+  const params = {
+    headers: { 'Authorization': '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' }
+  };
+  const res = http.get(url, params);
   sleep(1);
   check(res, {
     'is status 200': r => r.status === 200,

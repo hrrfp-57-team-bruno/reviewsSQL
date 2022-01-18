@@ -14,10 +14,10 @@ connection.connect((err) => {
     console.log('Connected to MySQL!');
   }
 });
-
+// select * from reviews where product_id = 456789 and reported = "false" limit 20
 const getReviews = (product_id, count) => {
   return new Promise((resolve, reject) => {
-    const queryString = 'select * from reviews where product_id = ? limit ?';
+    const queryString = 'select * from reviews where product_id = ? and reported = "false" limit ?';
     const queryArgs = [product_id, count];
     connection.query(queryString, queryArgs, (err, results, field) => {
       if (err) {
@@ -29,10 +29,10 @@ const getReviews = (product_id, count) => {
   });
 };
 
-const addReview = ({product_id, rating, summary, body, recommend, name, email}) => {
+const addReview = ({product_id, rating, date, summary, body, recommend, name, email}) => {
   return new Promise((resolve, reject) => {
     const queryString = 'insert into reviews (product_id, rating, date, summary, body, recommend, reported, reviewer_name, reviewer_email, response, helpfulness) values ?';
-    const queryArgs = [[product_id, rating, 12345, summary, body, recommend, false, name, email, null, 0]];
+    const queryArgs = [[product_id, rating, date, summary, body, recommend.toString(), 'false', name, email, null, 0]];
     connection.query(queryString, [queryArgs], (err, results, field) => {
       if (err) {
         reject(err);
@@ -105,6 +105,34 @@ const addMetaData = ({characteristic_ids, review_id, values, product_id, charact
   });
 };
 
+const updateReview = (review_id) => {
+  return new Promise((resolve, reject) => {
+    let queryString = 'update reviews set helpfulness = helpfulness + 1 where review_id = ?';
+    let queryArgs = [review_id];
+    connection.query(queryString, queryArgs, (err, results, field) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(results);
+      }
+    });
+  });
+};
+
+const updateReviewReport = (review_id) => {
+  return new Promise((resolve, reject) => {
+    let queryString = 'update reviews set reported = "true" where review_id = ?';
+    let queryArgs = [review_id];
+    connection.query(queryString, queryArgs, (err, results, field) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(results);
+      }
+    });
+  });
+};
+
 const searchMetaData = (characteristics) => {
   return new Promise((resolve, reject) => {
     const queryString = 'select distinct characteristic_id, product_id, characteristic from meta where characteristic_id in (?)';
@@ -130,5 +158,7 @@ module.exports = {
   addReview: addReview,
   addPhotos: addPhotos,
   addMetaData: addMetaData,
-  searchMetaData: searchMetaData
+  searchMetaData: searchMetaData,
+  updateReview: updateReview,
+  updateReviewReport: updateReviewReport
 }

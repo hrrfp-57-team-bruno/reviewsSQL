@@ -15,6 +15,7 @@ app.get('/reviews', (req, res) => {
   const obj = {};
   db.getReviews(product_id, count)
     .then((data) => {
+      console.log(data);
       for (let i = 0; i < data.length; i++) {
         data[i].recommend === 'true' ? data[i].recommend = true : data[i].recommend = false;
         data[i].reported === 'true' ? data[i].reported = true : data[i].reported = false;
@@ -114,6 +115,7 @@ app.get('/reviews/meta', (req, res) => {
 
 app.post('/reviews', (req, res) => {
   let review_id;
+  req.body.date = Math.round((new Date()).getTime())
   db.addReview(req.body)
     .then((data) => {
       review_id = data.insertId;
@@ -145,6 +147,27 @@ app.post('/reviews', (req, res) => {
     });
 });
 
+app.put('/reviews/:review_id/helpful', (req, res) => {
+  const review_id = req.params.review_id;
+  db.updateReview(review_id)
+    .then((data) => {
+      res.send();
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+});
+
+app.put('/reviews/:review_id/report', (req, res) => {
+  const review_id = req.params.review_id;
+  db.updateReviewReport(review_id)
+    .then((data) => {
+      res.send();
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+});
 
 const port = 3001;
 
