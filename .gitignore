@@ -1,6 +1,3 @@
 node_modules
 .DS_Store
-reviews_photos.csv
-reviews.csv
-characteristics.csv
-characteristic_reviews.csv
+csv

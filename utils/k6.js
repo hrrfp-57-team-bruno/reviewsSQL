@@ -5,11 +5,12 @@ import { Counter } from 'k6/metrics';
 export const requests = new Counter('http_reqs');
 
 export const options = {
-  vus: 100,
-  duration: '15s',
+  vus: 200,
+  duration: '60s',
 }
 
 const url = 'http://localhost:3001/reviews/meta?product_id=40344';
+// const url = 'http://localhost:3001/reviews/?product_id=40344';
 
 export default function() {
   const res = http.get(url);
