@@ -6,7 +6,7 @@ const db = require('./database/index.js');
 const app = express();
 app.use(express.json());
 app.use(cors({
-  origin: 'http://localhost:3000'
+  origin: true
 }));
 
 app.get('/reviews', (req, res) => {
@@ -15,7 +15,6 @@ app.get('/reviews', (req, res) => {
   const obj = {};
   db.getReviews(product_id, count)
     .then((data) => {
-      console.log(data);
       for (let i = 0; i < data.length; i++) {
         data[i].recommend === 'true' ? data[i].recommend = true : data[i].recommend = false;
         data[i].reported === 'true' ? data[i].reported = true : data[i].reported = false;
@@ -119,7 +118,9 @@ app.post('/reviews', (req, res) => {
   db.addReview(req.body)
     .then((data) => {
       review_id = data.insertId;
-      return db.addPhotos(review_id, req.body.photos);
+      if (req.body.photos.length > 0) {
+        return db.addPhotos(review_id, req.body.photos);
+      }
     })
     .then((data) => {
       return db.searchMetaData(req.body.characteristics);
@@ -148,6 +149,7 @@ app.post('/reviews', (req, res) => {
 });
 
 app.put('/reviews/:review_id/helpful', (req, res) => {
+  console.log('reported');
   const review_id = req.params.review_id;
   db.updateReview(review_id)
     .then((data) => {
@@ -159,6 +161,8 @@ app.put('/reviews/:review_id/helpful', (req, res) => {
 });
 
 app.put('/reviews/:review_id/report', (req, res) => {
+  console.log('reported');
+
   const review_id = req.params.review_id;
   db.updateReviewReport(review_id)
     .then((data) => {

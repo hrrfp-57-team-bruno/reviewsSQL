@@ -73,7 +73,8 @@ const addPhotos = (review_id, photos) => {
     });
   });
 };
-
+// select * from reviews inner join meta on meta.review_id = reviews.review_id and reviews.product_id = ?
+// select * from reviews inner join photos on reviews.review_id = photos.review_id and reviews.product_id = 40344;
 const getMetaData = (product_id) => {
   return new Promise((resolve, reject) => {
     let queryString = 'select * from reviews inner join meta on meta.review_id = reviews.review_id and reviews.product_id = ?;'
