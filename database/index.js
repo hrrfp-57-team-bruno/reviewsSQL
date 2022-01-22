@@ -29,6 +29,20 @@ const getReviews = (product_id, count) => {
   });
 };
 
+const getReviews2 = (product_id, count) => {
+  return new Promise((resolve, reject) => {
+    const queryString = 'select * from photos as c right join (select * from reviews where product_id = ?) as e on c.review_id = e.review_id;';
+    const queryArgs = [product_id];
+    connection.query(queryString, queryArgs, (err, results, field) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(results);
+      }
+    });
+  });
+};
+
 const addReview = ({product_id, rating, date, summary, body, recommend, name, email}) => {
   return new Promise((resolve, reject) => {
     const queryString = 'insert into reviews (product_id, rating, date, summary, body, recommend, reported, reviewer_name, reviewer_email, response, helpfulness) values ?';
@@ -73,8 +87,8 @@ const addPhotos = (review_id, photos) => {
     });
   });
 };
-// select * from reviews inner join meta on meta.review_id = reviews.review_id and reviews.product_id = ?
-// select * from reviews inner join photos on reviews.review_id = photos.review_id and reviews.product_id = 40344;
+
+
 const getMetaData = (product_id) => {
   return new Promise((resolve, reject) => {
     let queryString = 'select * from reviews inner join meta on meta.review_id = reviews.review_id and reviews.product_id = ?;'
@@ -154,6 +168,7 @@ const searchMetaData = (characteristics) => {
 
 module.exports = {
   getReviews: getReviews,
+  getReviews2: getReviews2,
   getReviewPhotos: getReviewPhotos,
   getMetaData: getMetaData,
   addReview: addReview,

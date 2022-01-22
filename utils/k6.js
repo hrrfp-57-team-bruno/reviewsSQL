@@ -9,8 +9,8 @@ export const options = {
   duration: '60s',
 }
 
-// const url = 'http://localhost:3001/reviews/?product_id=40344';
-const url = 'http://localhost:3001/reviews/meta?product_id=40344';
+const url = 'http://localhost:3001/reviews/?product_id=40344';
+// const url = 'http://localhost:3001/reviews/meta?product_id=40344';
 // const url = 'https://app-hrsei-api.herokuapp.com/api/fec2/hr-rfp/reviews/?product_id=40344';
 // const url = 'https://app-hrsei-api.herokuapp.com/api/fec2/hr-rfp/reviews/meta?product_id=40344';
 

@@ -9,35 +9,105 @@ app.use(cors({
   origin: true
 }));
 
+// app.get('/reviews', (req, res) => {
+//   let { product_id, count } = req.query;
+//   count ? count = Number(count) : count = 5;
+//   const obj = {};
+//   db.getReviews(product_id, count)
+//     .then((data) => {
+//       for (let i = 0; i < data.length; i++) {
+//         data[i].recommend === 'true' ? data[i].recommend = true : data[i].recommend = false;
+//         data[i].reported === 'true' ? data[i].reported = true : data[i].reported = false;
+//         data[i].date = new Date(Number(data[i].date)).toISOString();
+//       }
+//       obj.product = data[0].product_id.toString();
+//       obj.page = 0;
+//       obj.count = count;
+//       obj.results = data;
+
+//       const review_ids = [];
+//       for (let i = 0; i < data.length; i++) {
+//         review_ids.push(data[i]['review_id']);
+//       }
+//       return db.getReviewPhotos(review_ids);
+//     })
+//     .then((data) => {
+//       for (let i = 0; i < obj.results.length; i++) {
+//         obj.results[i].photos = [];
+//         for (let j = 0; j < data.length; j++) {
+//           if (obj.results[i].review_id === data[j].review_id) {
+//             obj.results[i].photos.push(data[j]);
+//           }
+//         }
+//       }
+//       res.send(obj);
+//     })
+//     .catch((err) => {
+//       console.log(err);
+//     });
+// });
+
 app.get('/reviews', (req, res) => {
   let { product_id, count } = req.query;
   count ? count = Number(count) : count = 5;
   const obj = {};
-  db.getReviews(product_id, count)
+  db.getReviews2(product_id, count)
     .then((data) => {
+      obj.product = data[0].product_id.toString();
+      obj.page = 0;
+      obj.count = count;
+      obj.results = [];
+      const check = {};
+
       for (let i = 0; i < data.length; i++) {
         data[i].recommend === 'true' ? data[i].recommend = true : data[i].recommend = false;
         data[i].reported === 'true' ? data[i].reported = true : data[i].reported = false;
         data[i].date = new Date(Number(data[i].date)).toISOString();
-      }
-      obj.product = data[0].product_id.toString();
-      obj.page = 0;
-      obj.count = count;
-      obj.results = data;
-      const review_ids = [];
-      for (let i = 0; i < data.length; i++) {
-        review_ids.push(data[i]['review_id']);
-      }
-      return db.getReviewPhotos(review_ids);
-    })
-    .then((data) => {
-      for (let i = 0; i < obj.results.length; i++) {
-        obj.results[i].photos = [];
-        for (let j = 0; j < data.length; j++) {
-          if (obj.results[i].review_id === data[j].review_id) {
-            obj.results[i].photos.push(data[j]);
+
+        if (check[data[i].review_id] === undefined) {
+          data[i].photos = [];
+          if (data[i].url) {
+            data[i].photos.push({
+              id: data[i].id,
+              review_id: data[i].review_id,
+              url: data[i].url
+            });
+          }
+          check[data[i].review_id] = data[i];
+        } else {
+          if (data[i].url) {
+            check[data[i].review_id].photos.push({
+              id: data[i].id,
+              review_id: data[i].review_id,
+              url: data[i].url
+            });
           }
         }
+      }
+
+      // for (let i = 0; i < data.length; i++) {
+      //   if (check[data[i].review_id] === undefined) {
+      //     data[i].photos = [];
+      //     if (data[i].url) {
+      //       data[i].photos.push({
+      //         id: data[i].id,
+      //         review_id: data[i].review_id,
+      //         url: data[i].url
+      //       });
+      //     }
+      //     check[data[i].review_id] = data[i];
+      //   } else {
+      //     if (data[i].url) {
+      //       check[data[i].review_id].photos.push({
+      //         id: data[i].id,
+      //         review_id: data[i].review_id,
+      //         url: data[i].url
+      //       });
+      //     }
+      //   }
+      // }
+      for (let key in check) {
+        obj.results.push(check[key]);
       }
       res.send(obj);
     })
@@ -149,7 +219,6 @@ app.post('/reviews', (req, res) => {
 });
 
 app.put('/reviews/:review_id/helpful', (req, res) => {
-  console.log('reported');
   const review_id = req.params.review_id;
   db.updateReview(review_id)
     .then((data) => {
@@ -161,8 +230,6 @@ app.put('/reviews/:review_id/helpful', (req, res) => {
 });
 
 app.put('/reviews/:review_id/report', (req, res) => {
-  console.log('reported');
-
   const review_id = req.params.review_id;
   db.updateReviewReport(review_id)
     .then((data) => {
